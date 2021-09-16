@@ -48,12 +48,16 @@ public class Trex extends Creature {
 
 //        System.out.println(x + "/" + y + " GET " + this.getX() + "/" + this.getY());
 
+
         this.setX(x += speed * Math.cos(thetaMoveTo));
+        // Because of the theta not always give the right positive / negative direction.
+        // That's the reason we need to use a debug boolean here.
+        // Same feature in rotate() method below.
         if (debug) this.setY(y -= speed * Math.sin(thetaMoveTo));
         else this.setY(y += speed * Math.sin(thetaMoveTo));
 
         updateImg();
-        updateEnergy(-0.1);//TODO testing
+        updateEnergy(-0.05);//TODO testing
 
     }
 

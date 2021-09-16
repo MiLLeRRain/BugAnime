@@ -3,6 +3,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
 
@@ -64,7 +65,8 @@ public class CreatureControl extends Pane {
         for (int i = 0; i < ps; i++) {
             int x = random.nextInt(w);
             int y = random.nextInt(h);
-            Plant p = new Plant(x, y);
+            String name = "plant"+random.nextInt(4);
+            Plant p = new Plant(x, y, name);
             plants.add(p);
             this.getChildren().add(p);
         }
@@ -111,6 +113,7 @@ public class CreatureControl extends Pane {
      * 3. else plan grow.
      */
     private void processPlants() {
+        Collections.shuffle(plants); // Make processing order randomly, because Trex had sorted the list.
         ArrayList<Plant> plantsToRemove = new ArrayList<>();
         ArrayList<Plant> plantsToAdd = new ArrayList<>();
 
@@ -127,7 +130,8 @@ public class CreatureControl extends Pane {
             else if (isReadyToSeeding(p, plantsToAdd)) {
                 p.respawn();
                 double[] spawnCoord = spawnCoord(p.x, p.y);
-                Plant baby = new Plant(spawnCoord[0], spawnCoord[1]);
+                String name = "plant"+random.nextInt(4);
+                Plant baby = new Plant(spawnCoord[0], spawnCoord[1], name);
                 plantsToAdd.add(baby);
                 this.getChildren().add(baby);
             }

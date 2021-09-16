@@ -15,6 +15,8 @@ import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -63,7 +65,7 @@ public class Anime extends Application {
 
 
 
-        gameMap = new CreatureControl(plantQuantity, trexQuantity); //TODO 后期由用户界面添加
+        gameMap = new CreatureControl(plantQuantity, trexQuantity); //TODO Interact with user
 
         root.setCenter(gameMap);
         root.getCenter().prefWidth(stage.getWidth());root.getCenter().prefHeight(stage.getHeight()-40);
@@ -72,7 +74,7 @@ public class Anime extends Application {
             @Override
             public void handle(ActionEvent e) {
 
-                gameMap.run(); //TODO 全部由CC内控制
+                gameMap.run(); //TODO Fully controlled by CreatureControl
 
             }
         });
@@ -85,7 +87,7 @@ public class Anime extends Application {
         stage.setScene(scene);
         stage.setWidth(STAGE_WIDTH); stage.setHeight(STAGE_HEIGHT);
         stage.centerOnScreen();
-        stage.setTitle("Dinosaur Anime");
+        stage.setTitle("Yoshi Anime");
         stage.show();
     }
 
@@ -101,7 +103,13 @@ public class Anime extends Application {
         hb.setPadding(new Insets(15, 12, 15, 12));
         hb.setSpacing(10);
 
+        BackgroundFill bgf =  new BackgroundFill(Paint.valueOf("#DAE6F3"), new CornerRadii(5), new Insets(2));
+        BorderStroke bos = new BorderStroke(Paint.valueOf("#009900"), BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(2));
+
         Button play = new Button("Play");
+        play.setPrefWidth(80);
+        play.setBackground(new Background(bgf));
+        play.setBorder(new Border(bos));
         play.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -110,6 +118,9 @@ public class Anime extends Application {
         });
 
         Button pause = new Button("Pause");
+        pause.setPrefWidth(80);
+        pause.setBackground(new Background(bgf));
+        pause.setBorder(new Border(bos));
         pause.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -118,6 +129,9 @@ public class Anime extends Application {
         });
 
         Button stop = new Button("Stop");
+        stop.setPrefWidth(80);
+        stop.setBackground(new Background(bgf));
+        stop.setBorder(new Border(bos));
         stop.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
