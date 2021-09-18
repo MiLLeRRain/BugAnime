@@ -53,15 +53,16 @@ public abstract class Creature extends ImageView {
      * Update scale for size growing or hurting effect.
      */
     public void updateScale() {
+        this.setOpacity(Math.max(0.2, this.energy / 22));
         this.setScaleX(Math.max(0.5, this.energy / 10));
         this.setScaleY(Math.max(0.5, this.energy / 10));
     }
 
     public abstract void respawn();
 
-    public void eat(Creature target) {};
+    public void eat(Creature target) {}
 
-    public void grow() {};
+    public void grow() {}
 
     /**
      * Ending life
