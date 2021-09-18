@@ -8,8 +8,6 @@ import javafx.scene.Group;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -51,9 +49,6 @@ public class CreatureControl extends Pane {
 
     // Game status flag
     private boolean gameSet = true;
-
-    // Background Music
-    private MediaPlayer audio;
 
     /**
      * Build an empty scene
@@ -139,9 +134,13 @@ public class CreatureControl extends Pane {
     /**
      * Director of the show, call behaviour controller for 2 actors (Plant and Trex)
      */
-    public void run() {
+    public boolean run() {
         processPlants();
-        if (!processTrexes() && !gameSet) gameOver();
+        if (!processTrexes() && !gameSet) {
+            gameOver();
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -155,7 +154,6 @@ public class CreatureControl extends Pane {
                 "-fx-background-repeat: stretch; " +
                 "-fx-background-color: DAE6F3; " +
                 "-fx-background-position: center center;");
-
     }
 
     /**
@@ -532,16 +530,5 @@ public class CreatureControl extends Pane {
         return Math.sqrt(Math.pow((o.x - t.x), 2) + Math.pow((o.y - t.y), 2));
     }
 
-    /**
-     * Background Music Player setting
-     */
-    private void setBGM() {
-        if (!gameStart) {
-            Media buzzer = new Media(this.getClass().getResource("yoshi.mp3").toExternalForm());
-            audio = new MediaPlayer(buzzer);
-            audio.setCycleCount(MediaPlayer.INDEFINITE);
-            audio.play();
-        } else audio.stop();
-    }
 
 }

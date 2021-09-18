@@ -35,7 +35,7 @@ public class Anime extends Application {
     private final BorderStroke bos = new BorderStroke(Paint.valueOf("#009900"), BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(2));
 
     private BorderPane root; // Main Pane for the Stage
-    private CreatureControl gameMap = new CreatureControl(); // Game map, and Action controller for all Creature.
+    private CreatureControl gameMap; // Game map, and Action controller for all Creature.
     private KeyFrame frame; // Animation KeyFrame for Main Pane
     private Timeline timeline = new Timeline(); // Animation Timeline for Main Pane
 
@@ -45,6 +45,12 @@ public class Anime extends Application {
     private int plantQuantity = 10;
     private int trexQuantity = 10;
 
+    // Background Music
+    private Media title = new Media(this.getClass().getResource("title.mp3").toExternalForm());
+    private Media gaming = new Media(this.getClass().getResource("yoshi.mp3").toExternalForm());
+    private Media playerDown = new Media(this.getClass().getResource("gameset.mp3").toExternalForm());
+    private MediaPlayer audio = new MediaPlayer(title);
+
     public static void main(String[] args) {
         launch();
     }
@@ -52,23 +58,7 @@ public class Anime extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-        // Set root BorderPane
-        root = new BorderPane();
-
-        // Set menu pane
-        HBox menu = addTopBox();
-        root.setTop(menu);
-
-        // Set center pane
-        root.setCenter(gameMap);
-        root.getCenter().prefWidth(stage.getWidth());
-        root.getCenter().prefHeight(stage.getHeight());
-
-        // Set bottom pane
-        HBox bottom = addBottomBox();
-        root.setBottom(bottom);
-
-        timeline.setCycleCount(Timeline.INDEFINITE);
+        root = initializeBorderPane();
 
         Scene scene = new Scene(root);
         stage.setScene(scene);
@@ -77,6 +67,37 @@ public class Anime extends Application {
         stage.centerOnScreen();
         stage.setTitle("Yoshi Anime");
         stage.show();
+    }
+
+    /**
+     * Initialize the root BorderPane including timeline and audio to Title status
+     * @return root
+     */
+    private BorderPane initializeBorderPane() {
+        BorderPane toReturn = new BorderPane();
+
+        // Set menu pane
+        HBox menu = addTopBox();
+        toReturn.setTop(menu);
+
+        // Set center pane
+        gameMap = new CreatureControl();
+        toReturn.setCenter(gameMap);
+
+        // Set bottom pane
+        HBox bottom = addBottomBox();
+        toReturn.setBottom(bottom);
+
+        // Roll the animation
+        timeline.setCycleCount(Timeline.INDEFINITE);
+
+        // Roll the track
+        audio.setCycleCount(MediaPlayer.INDEFINITE);
+        setBGM();
+        audio.play(); //TODO 是否移动下去
+
+//        System.out.println(timeline.getStatus().toString());
+        return toReturn;
     }
 
     /**
@@ -105,6 +126,7 @@ public class Anime extends Application {
         speedCtrl.setPrefWidth(80);
         speedCtrl.setMin(0); speedCtrl.setMax(2);
         speedCtrl.setValue(1);
+        speedCtrl.setTooltip(new Tooltip("" + speedCtrl.getValue()));
         speedCtrl.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
@@ -139,21 +161,27 @@ public class Anime extends Application {
         play.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                if (!gameStart) {
+                // 如果timeline在STOPPED， 则重开 相当于RESET， 如果在PAUSED，则进行下一步play
+                // 或者用户输入数据改变，则可直接重置
+                if (timeline.getStatus().toString().equals("STOPPED")) {
                     gameMap = new CreatureControl(plantQuantity, trexQuantity);
                     root.setCenter(gameMap);
                     frame = new KeyFrame(Duration.millis(10), new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent e) {
-                            if (!gameStart) return;
-                            gameMap.run(); //TODO Fully controlled by CreatureControl
+                            if (!gameMap.run()) {
+                                timeline.stop(); // 如果返回游戏结束 停止当前timeline回STOPPED状态
+                                setBGM(); // 更改游戏为gameover音乐 然后接主题曲 TODO
+                            }
                         }
                     });
                     timeline.getKeyFrames().add(frame);
-                    setBGM();
+                    timeline.setRate(1);
+                    speedCtrl.setValue(1);
+                    setBGM(); // 更改音乐为游戏进行曲 TODO
                     gameStart = true;
                 }
-                timeline.play();
+                timeline.play(); // 此处只有状态为 RUNNING 或 PAUSE才能触发
             }
         });
 
@@ -167,26 +195,12 @@ public class Anime extends Application {
         reset.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                if (gameStart) {
-                    setBGM();
-                    timeline.stop();
-                    timeline.getKeyFrames().remove(frame);
-                    gameMap = new CreatureControl(plantQuantity, trexQuantity);
-                    gameStart = false;
-                }
+                // 无论何种状态直接重置回初始画面
+                timeline.stop();
+                setBGM(); // 更改音乐回主题歌 TODO
+//                timeline.getKeyFrames().removeAll();
+                gameMap = new CreatureControl();
                 root.setCenter(gameMap);
-                frame = new KeyFrame(Duration.millis(10), new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent e) {
-                        gameMap.run();
-                    }
-                });
-                timeline.getKeyFrames().add(frame);
-                timeline.setRate(1);
-                speedCtrl.setValue(1);
-                setBGM();
-                gameStart = true;
-                timeline.play();
             }
         });
 
@@ -265,5 +279,18 @@ public class Anime extends Application {
         }
     }
 
+    /**
+     * Background Music Player setting
+     */
+    // audio.stop()都在此处做
+    // 几种STOP状态
+    // 1. GAMEOVER导致的STOP 需要先播放gameover音乐 然后接主题曲
+    // 2. reset导致的STOP 需要直接接主题曲
+    // 3. 最早先开始的STOP
+    private void setBGM() {
+        if (!gameStart) {
+            audio.play();
+        } else audio.stop();
+    }
 
 }
