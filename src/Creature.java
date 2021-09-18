@@ -1,24 +1,24 @@
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+/**
+ * Creature class
+ */
 public abstract class Creature extends ImageView {
 
-    protected String name;
-    protected Image img;
-    protected int width;
-    protected double energy = 10;
-    protected double energyLimit;
-    protected double matureEnergy;
-    protected double rotateV = 0;
-    protected double birthRate;
-    protected int babys;
+    protected String name; // Name
+    protected Image img; // Image
+    protected int width; // Icon size
+    protected double energy = 10; // Creature energy
+    protected double energyLimit; // Max energy
+    protected double matureEnergy; // Adult flag
+    protected double birthRate; // Birthrate to control for balancing eco-system
+    protected int babies; // How many offsprings before life ending
 
-    protected double x;
-    protected double y;
+    protected double x; // Position
+    protected double y; // Position
 
-    public Creature() {
-    }
-
+    public Creature() {}
 
     public Creature(double x, double y, String name, int size) {
         this.x = x;
@@ -40,17 +40,17 @@ public abstract class Creature extends ImageView {
     public void rotate(double theta, boolean debug) {}
 
     /**
-     * For testing
+     * Updating energy
      */
     public void updateEnergy(double e) {
         this.energy += e;
         energy = Math.min(energy, energyLimit);
         energy = Math.max(energy, 0);
-        updateScale(); //update the size.
+        updateScale();
     }
 
     /**
-     * Update scale for size growing or dying effect.
+     * Update scale for size growing or hurting effect.
      */
     public void updateScale() {
         this.setScaleX(Math.max(0.5, this.energy / 10));
@@ -63,8 +63,15 @@ public abstract class Creature extends ImageView {
 
     public void grow() {};
 
+    /**
+     * Ending life
+     */
     public void die() {this.energy = 0;}
 
+    /**
+     * Boolean flag
+     * @return if this creature is an adult
+     */
     public boolean matured() {return this.energy >= matureEnergy;}
 
 }

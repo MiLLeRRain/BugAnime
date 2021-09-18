@@ -1,19 +1,29 @@
 import javafx.scene.image.Image;
-
 import java.util.Random;
 
+/**
+ * Trex (Yoshi) Class
+ */
 public class Trex extends Creature {
-    protected double speed = 1.2;
-    protected double detectorRange = 150;
-    protected double contactRange = 10;
-    protected double thetaMoveTo = - Math.PI / 2; // The angle trex is moving forward to.
-    protected int feastScore;
 
+    protected double speed = 1.2; // Step speed
+    protected double detectorRange = 150; // Detecting range
+    protected double contactRange = 10; // Contact range, eat or mate
+    protected double thetaMoveTo = - Math.PI / 2; // The direction this Trex is facing and moving forward to
+    protected int feastScore; // The quantity of plants this Trex had eaten before it died.
+
+    // 2 images to animate, when moving right to left
     private Image trex = new Image("trex.png");
     private Image trex2 = new Image("trex2.png");
+    // 2 flipped images to animate, when moving right to left
     private Image trexflip = new Image("trexflip.png");
     private Image trex2flip = new Image("trex2flip.png");
 
+    /**
+     * Constructor
+     * @param x position
+     * @param y position
+     */
     Trex(double x, double y) {
         super(x, y, "trex", 30);
         this.energy = 10;
@@ -84,17 +94,23 @@ public class Trex extends Creature {
         else this.setRotate(theta / Math.PI * 180); //TODO check here
     }
 
+    /**
+     * Eat, update energy, update score field
+     * @param target the plant been eaten
+     */
     @Override
     public void eat(Creature target) {
         updateEnergy(target.energy);
         feastScore++;
     }
 
+    /**
+     * Give birth: consume energy, update field to store the number of its offspring
+     */
     @Override
     public void respawn() {
         updateEnergy(-this.energy / 3);
-        this.babys++;
+        this.babies++;
     }
-
 
 }

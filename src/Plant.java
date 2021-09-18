@@ -1,11 +1,17 @@
-import javafx.scene.Node;
-
-import java.util.Random;
-
+/**
+ * Plant Class
+ */
 public class Plant extends Creature {
-    protected double speed = 0.5;
-    protected double thetaMoveTo = Math.PI / 2;
 
+    protected double speed = 0.5; // Step speed
+    protected double thetaMoveTo = Math.PI / 6; // The direction this Plant is moving forward to.
+
+    /**
+     * Constructor
+     * @param x position
+     * @param y position
+     * @param name creature name
+     */
     Plant(double x, double y, String name) {
         super(x, y, name, 12);
         this.energyLimit = 20;
@@ -13,6 +19,10 @@ public class Plant extends Creature {
         this.birthRate = 0.5;
     }
 
+    /**
+     * Move method
+     * @param theta the moving direction
+     */
     @Override
     public void move(double theta) {
         this.thetaMoveTo = theta;
@@ -29,20 +39,21 @@ public class Plant extends Creature {
         this.setTranslateY(y += speed * Math.sin(thetaMoveTo));
     }
 
+    /**
+     * Give birth: consume energy, update field to store the number of its offspring
+     */
     @Override
     public void respawn() {
         updateEnergy(-10);
-        this.babys++;
+        this.babies++;
     }
 
+    /**
+     * Grow: increase energy
+     */
     @Override
     public void grow() {
         updateEnergy(0.3);
-    }
-
-    @Override
-    public Node getStyleableNode() {
-        return super.getStyleableNode();
     }
 
 }

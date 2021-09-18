@@ -1,4 +1,3 @@
-import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -22,34 +21,55 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
 
-
+/**
+ * Main game Pane for everything to happen.
+ */
 public class CreatureControl extends Pane {
+
+    // 2 lists hold all living creatures.
     private final ArrayList<Plant> plants;
     private final ArrayList<Trex> trexes;
+
+    // Creature limit for eco-balancing and user visual health
     private final int plantsLimit = 60;
     private final int trexesLimit = 30;
 
+    // Field for score report
     private int totalPlants = 0;
     private int totalTrexs = 0;
     private int heroMamaPlant = 0;
     private int heroMamaTrex = 0;
     private int bestFeast = 0;
 
-    final private int w = 600, h = 500;
+    // Size of the world
+    private final int GAMEPANE_WIDTH = 600, GAMEPANE_HEIGHT = 500;
 
+    // Random helper
     private final Random random = new Random();
 
-    private Timeline endingAnime;
+    //
     private boolean gameSet = true;
 
     /**
-     * For testing only.
+     * Build an empty scene
      */
     CreatureControl() {
         plants = new ArrayList<>();
         trexes = new ArrayList<>();
-        this.setStyle("-fx-background-color: DAE6F3;");    //-fx-background-image: url('dino.jpeg');
-        this.setPrefSize(w, h);
+        this.setStyle("-fx-background-image: url('bg.gif'); " +
+                "-fx-background-repeat: stretch; " +
+                "-fx-background-color: DAE6F3; " +
+                "-fx-background-position: center center;");
+        this.setPrefSize(GAMEPANE_WIDTH, GAMEPANE_HEIGHT);
+        showTitle();
+    }
+
+    /**
+     * Build a title box and show up
+     */
+    private void showTitle() {
+        VBox titleVB = new VBox();
+        outputTextSetAndPlay(titleVB, "- YOSHI ISLAND -");
     }
 
     /**
@@ -62,12 +82,16 @@ public class CreatureControl extends Pane {
         plants = new ArrayList<>();
         trexes = new ArrayList<>();
         this.setStyle("-fx-background-color: DAE6F3;");    //-fx-background-image: url('dino.jpeg');
-//        this.setPrefSize(w, h); //TODO is this the right one?
-        this.setPrefWidth(w);
-        this.setPrefHeight(h);
+        this.setPrefWidth(GAMEPANE_WIDTH);
+        this.setPrefHeight(GAMEPANE_HEIGHT);
         initGameMap(ps, ts);
     }
 
+    /**
+     * Initial the game map by input quantity of 2 types of creatures
+     * @param ps quantity of plants
+     * @param ts quantity of trexes
+     */
     private void initGameMap(int ps, int ts) {
         setPlants(ps);
         setTrexes(ts);
@@ -81,8 +105,8 @@ public class CreatureControl extends Pane {
      */
     private void setPlants(int ps) {
         for (int i = 0; i < ps; i++) {
-            int x = random.nextInt(w);
-            int y = random.nextInt(h);
+            int x = random.nextInt(GAMEPANE_WIDTH);
+            int y = random.nextInt(GAMEPANE_HEIGHT);
             String name = "plant" + random.nextInt(4);
             Plant p = new Plant(x, y, name);
             plants.add(p);
@@ -98,8 +122,8 @@ public class CreatureControl extends Pane {
      */
     private void setTrexes(int ts) {
         for (int i = 0; i < ts; i++) {
-            int x = random.nextInt(w);
-            int y = random.nextInt(h);
+            int x = random.nextInt(GAMEPANE_WIDTH);
+            int y = random.nextInt(GAMEPANE_HEIGHT);
             Trex t = new Trex(x, y);
             trexes.add(t);
             this.getChildren().add(t);
@@ -108,33 +132,48 @@ public class CreatureControl extends Pane {
     }
 
     /**
-     * Method to directing the show.
+     * Director of the show, call behaviour controller for 2 actors (Plant and Trex)
      */
     public void run() {
         processPlants();
-        if (!processTrexes() && !gameSet) gameOver(); //TODO build later
+        if (!processTrexes() && !gameSet) gameOver();
     }
 
     /**
      * Show Game Over Banner.
      */
     private void gameOver() {
-
         VBox goVB = new VBox();
-        goVB.setPrefWidth(w);
+        outputTextSetAndPlay(goVB, "- GAME OVER -");
+        gameSet = true;
+        this.setStyle("-fx-background-image: url('bg.gif'); " +
+                "-fx-background-repeat: stretch; " +
+                "-fx-background-color: DAE6F3; " +
+                "-fx-background-position: center center;");
+
+    }
+
+    /**
+     * Method to set up an output Text and show up
+     * @param goVB the VBox need to be set up
+     * @param str the String to be shown
+     */
+    private void outputTextSetAndPlay(VBox goVB, String str) {
+        goVB.setPrefWidth(GAMEPANE_WIDTH);
         goVB.setSpacing(10);
         goVB.setAlignment(Pos.CENTER);
         goVB.setTranslateY(100);
 
-        Group statics = statics();
-        goVB.getChildren().add(statics);
-
+        Group showing = new Group();
+        if (str.equals("- GAME OVER -")) showing = statics(str);
+        else if (str.equals("- YOSHI ISLAND -")) showing = statics(str);
+        goVB.getChildren().add(showing);
 
         this.getChildren().add(goVB);
 
-        endingAnime = new Timeline();
+        Timeline textAnime = new Timeline();
 
-        Scale scale = new Scale(1, 1, w/2.0, h/2.0);
+        Scale scale = new Scale(1, 1, GAMEPANE_WIDTH /2.0, GAMEPANE_HEIGHT /2.0);
         goVB.getTransforms().add(scale);
 
         KeyValue kv1x = new KeyValue(scale.xProperty(), 0.5);
@@ -143,54 +182,87 @@ public class CreatureControl extends Pane {
 
         KeyValue kv2x = new KeyValue(scale.xProperty(), 1);
         KeyValue kv2y = new KeyValue(scale.yProperty(), 1);
-        KeyFrame kf2 = new KeyFrame(Duration.seconds(1), kv2x, kv2y);
+        KeyFrame kf2 = new KeyFrame(Duration.seconds(2), kv2x, kv2y);
 
-        endingAnime.getKeyFrames().addAll(kf1, kf2);
-        endingAnime.setAutoReverse(true);
-        endingAnime.play();
-
-        gameSet = true;
-
+        textAnime.getKeyFrames().addAll(kf1, kf2);
+        textAnime.setAutoReverse(true);
+        textAnime.play();
     }
 
     /**
-     * Construct a group of text including statics:
-     * totalPlants, totalTrexes, heroMamaPlant, heroMamaTrex, bestFeast
-     * @return
+     * Construct a group of text including:
+     * game title or
+     * game statics (totalPlants, totalTrexes, heroMamaPlant, heroMamaTrex, bestFeast)
+     * @return a group with set texts
      */
-    private Group statics() {
+    private Group statics(String str) {
         Group toReturn = new Group();
 
         // Title banner
         HBox hb = new HBox();
         hb.setAlignment(Pos.CENTER);
         hb.setSpacing(10);
-        Text end = new Text("- GAME OVER -");
-        end.setFont(Font.font("Ubuntu Light", FontWeight.BOLD, 30));
-        end.setFill(Paint.valueOf("#1E88E5"));
-        end.setTextAlignment(TextAlignment.CENTER);
+        Text banner = new Text(str);
+        banner.setFont(Font.font("Ubuntu Light", FontWeight.BOLD, 30));
+        banner.setFill(Paint.valueOf(randomHEXColor()));
+        banner.setTextAlignment(TextAlignment.CENTER);
 
-        hb.getChildren().add(end);
+        playForFun(banner);
+
+        hb.getChildren().add(banner);
 
         // Information
         VBox vb = new VBox();
-        vb.setLayoutY(40);
-        vb.setSpacing(10);
-        Text report = new Text();
-        report.setText(
-                "\n\nTotal Plants Spawned: " + totalPlants + "\n"
-                        + "Total Dinosaurs Spawned: " + totalTrexs + "\n"
-                        + "Best mama Plant seeded " + heroMamaPlant + " babies.\n"
-                        + "Best mama Dino brood " + heroMamaTrex + " babies.\n"
-                        + "\n\n"
-                        + "Winner Dino had eaten " + bestFeast + " Plants."
-        );
-        report.setFont(Font.font("Ubuntu Light", FontWeight.THIN, 16));
-        report.setFill(Paint.valueOf("#5C6BC0"));
-        vb.getChildren().add(report);
+        if (str.equals("- GAME OVER -")) {
+            vb.setLayoutY(40);
+            vb.setSpacing(10);
+            Text report = new Text();
+            report.setText(
+                    "\n\nTotal Plants Spawned: " + totalPlants + "\n"
+                            + "Total Dinosaurs Spawned: " + totalTrexs + "\n"
+                            + "Best mama Plant seeded " + heroMamaPlant + " babies.\n"
+                            + "Best mama Dino brood " + heroMamaTrex + " babies.\n"
+                            + "\n\n"
+                            + "Winner Dino had eaten " + bestFeast + " Plants."
+            );
+            report.setFont(Font.font("Ubuntu Light", FontWeight.THIN, 16));
+            report.setFill(Paint.valueOf(randomHEXColor()));
+            vb.getChildren().add(report);
+        }
+
         toReturn.getChildren().addAll(hb, vb);
 
         return toReturn;
+    }
+
+    /**
+     * Animate the Text color for opening and ending
+     * @param banner
+     */
+    private void playForFun(Text banner) {
+        Timeline fun = new Timeline();
+        fun.setCycleCount(Timeline.INDEFINITE);
+        KeyFrame kf = new KeyFrame(Duration.millis(1000), new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                banner.setFill(Paint.valueOf(randomHEXColor()));
+            }
+        });
+        fun.getKeyFrames().add(kf);
+        fun.play();
+    }
+
+    /**
+     * Random a HEX color string
+     * from https://mlog.club/article/1029576
+     * @return
+     */
+    public String randomHEXColor() {
+        // create a big random number - maximum is ffffff (hex) = 16777215 (dez)
+        int nextInt = random.nextInt(0xffffff + 1);
+        // format it as hexadecimal string (with hashtag and leading zeros)
+        String colorCode = String.format("#%06x", nextInt);
+        return colorCode;
     }
 
     /**
@@ -231,7 +303,7 @@ public class CreatureControl extends Pane {
                 plantsToAdd.add(baby);
                 this.getChildren().add(baby);
                 totalPlants++;
-                heroMamaPlant = Math.max(p.babys, heroMamaPlant);
+                heroMamaPlant = Math.max(p.babies, heroMamaPlant);
             }
 
             //Rule 3 Getting strong
@@ -269,10 +341,10 @@ public class CreatureControl extends Pane {
     private double[] spawnCoord(double x, double y) {
         double[] toReturn;
         double toReturnX = -42, toReturnY = -42;
-        while (toReturnX < 20 || toReturnX > w - 20) {
+        while (toReturnX < 20 || toReturnX > GAMEPANE_WIDTH - 20) {
             toReturnX = x + (random.nextInt(60) - 30);
         }
-        while (toReturnY < 20 || toReturnY > h - 20) {
+        while (toReturnY < 20 || toReturnY > GAMEPANE_HEIGHT - 20) {
             toReturnY = y + (random.nextInt(60) - 30);
         }
         toReturn = new double[]{toReturnX, toReturnY};
@@ -362,7 +434,7 @@ public class CreatureControl extends Pane {
                 trexesToAdd.add(baby);
                 this.getChildren().add(baby);
                 totalTrexs++;
-                heroMamaTrex = Math.max(t.babys, heroMamaTrex);
+                heroMamaTrex = Math.max(t.babies, heroMamaTrex);
             }
 
             //Rule 4 Tracing yumyum
@@ -441,7 +513,7 @@ public class CreatureControl extends Pane {
      * @return is a boolean to tell if the Creature is getting too close to the border.
      */
     private boolean avoidGlitch(Creature c) {
-        return (c.x > 20 && c.x + 20 < w) && (c.y > 20 && c.y + 20 < h);
+        return (c.x > 20 && c.x + 20 < GAMEPANE_WIDTH) && (c.y > 20 && c.y + 20 < GAMEPANE_HEIGHT);
     }
 
     /**

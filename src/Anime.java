@@ -8,8 +8,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
@@ -20,21 +18,29 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-
+/**
+ * Assignment for SWEN502 (ICT School). Week 37, 2021.
+ * @Author Liam Han (Apang)
+ *
+ * Background gif image is made by Ben Matthews
+ * https://canvasanimations.wordpress.com/2017/10/06/recreating-yoshis-island/
+ * All copyrights of the characters used belongs to SUPER MARIO characters © NINTENDO.
+ *
+ */
 public class Anime extends Application {
 
     // Universal stylish attributes for this application.
-    final int STAGE_WIDTH = 600, STAGE_HEIGHT = 630;
-    final BackgroundFill bgf =  new BackgroundFill(Paint.valueOf("#DAE6F3"), new CornerRadii(5), new Insets(2));
-    final BorderStroke bos = new BorderStroke(Paint.valueOf("#009900"), BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(2));
+    private final int STAGE_WIDTH = 600, STAGE_HEIGHT = 630;
+    private final BackgroundFill bgf =  new BackgroundFill(Paint.valueOf("#DAE6F3"), new CornerRadii(5), new Insets(2));
+    private final BorderStroke bos = new BorderStroke(Paint.valueOf("#009900"), BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(2));
 
-    BorderPane root; // Main Pane for the Stage
-    CreatureControl gameMap = new CreatureControl(); // Game map, and Action controller for all Creature.
-    KeyFrame frame; // Animation KeyFrame for Main Pane
-    Timeline timeline = new Timeline(); // Animation Timeline for Main Pane
-    MediaPlayer audio; // Background Music
+    private BorderPane root; // Main Pane for the Stage
+    private CreatureControl gameMap = new CreatureControl(); // Game map, and Action controller for all Creature.
+    private KeyFrame frame; // Animation KeyFrame for Main Pane
+    private Timeline timeline = new Timeline(); // Animation Timeline for Main Pane
+    private MediaPlayer audio; // Background Music
 
-    boolean gameStart = false; // Game status flag for reset feature
+    private boolean gameStart = false; // Game status flag for reset feature
 
     // Default starting parameter
     private int plantQuantity = 10;
@@ -49,7 +55,6 @@ public class Anime extends Application {
 
         // Set root BorderPane
         root = new BorderPane();
-        root.setPrefSize(STAGE_WIDTH, STAGE_HEIGHT);
 
         // Set menu pane
         HBox menu = addTopBox();
@@ -84,19 +89,16 @@ public class Anime extends Application {
         HBox menuTab = new HBox();
         menuTab.setStyle("-fx-background-color: DAE6F3;");
         menuTab.setAlignment(Pos.CENTER);
-        menuTab.setPadding(new Insets(8, 12, 8, 12));
-        menuTab.setPrefHeight(40); //TODO height
+        menuTab.setPadding(new Insets(15, 12, 15, 12));
         menuTab.setSpacing(10);
-
 
         // Game status label and Speed controller
         HBox speedTab = new HBox();
         speedTab.setPrefWidth(200);
         speedTab.setSpacing(10);
         speedTab.setAlignment(Pos.CENTER_LEFT);
-        Label speedLbl= new Label("Speed: ");
+        Label speedLbl= new Label("Speed:");
         speedLbl.setPrefWidth(80);
-        speedLbl.setPrefHeight(24); //TODO height
         speedLbl.setAlignment(Pos.CENTER);
 
         Slider speedCtrl = new Slider();
@@ -189,15 +191,14 @@ public class Anime extends Application {
         });
 
         // Assemble all nodes into menuTab.
-
         menuTab.getChildren().addAll(bb, speedTab);
         menuTab.setBorder(new Border(bos));
         return menuTab;
     }
 
     /**
-     * Set a bottom box for text input area.
-     * @return a HBox holding 2 text fields.
+     * Set a bottom box for text input area
+     * @return a HBox holding 2 text fields
      */
     private HBox addBottomBox() {
         HBox bottom = new HBox();
@@ -217,6 +218,13 @@ public class Anime extends Application {
         return bottom;
     }
 
+    /**
+     * TestField build helper
+     * @param creature is the creature name
+     * @param s is the PromptText
+     * @param s2 is the TipText
+     * @return is finished TextField
+     */
     private TextField getTextField(String creature, String s, String s2) {
         TextField tf = new TextField();
         tf.setPrefWidth(300);
@@ -234,11 +242,21 @@ public class Anime extends Application {
         return tf;
     }
 
+    /**
+     * Update the starting parameter
+     * @param s tells which field argument to change
+     * @param v is the number of creature to spawn at the beginning
+     */
     private void updateGameCondition(String s, int v) {
         if (s.equals("Plant")) this.plantQuantity = v;
         else this.trexQuantity = v;
     }
 
+    /**
+     * Helper to validate input value
+     * @param str is the text input from user
+     * @return if the input is a legit Integer and number is lower than or equal to 30
+     */
     private boolean checkInteger(String str) {
         try {
             return Integer.parseInt(str) <= 30; // Check if the entered value is an Integer and <= 30;
