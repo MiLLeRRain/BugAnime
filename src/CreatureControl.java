@@ -154,6 +154,7 @@ public class CreatureControl extends Pane {
                 "-fx-background-repeat: stretch; " +
                 "-fx-background-color: DAE6F3; " +
                 "-fx-background-position: center center;");
+
     }
 
     /**

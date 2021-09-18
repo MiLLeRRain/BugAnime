@@ -12,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Paint;
@@ -37,19 +38,19 @@ public class Anime extends Application {
     private BorderPane root; // Main Pane for the Stage
     private CreatureControl gameMap; // Game map, and Action controller for all Creature.
     private KeyFrame frame; // Animation KeyFrame for Main Pane
-    private Timeline timeline = new Timeline(); // Animation Timeline for Main Pane
+    private final Timeline timeline = new Timeline(); // Animation Timeline for Main Pane
 
-    private boolean gameStart = false; // Game status flag for reset feature
+    private boolean gameStart = false; // 用来帮助BGM确认状态
 
     // Default starting parameter
     private int plantQuantity = 10;
     private int trexQuantity = 10;
 
     // Background Music
-    private Media title = new Media(this.getClass().getResource("title.mp3").toExternalForm());
-    private Media gaming = new Media(this.getClass().getResource("yoshi.mp3").toExternalForm());
-    private Media playerDown = new Media(this.getClass().getResource("gameset.mp3").toExternalForm());
-    private MediaPlayer audio = new MediaPlayer(title);
+    final private MediaPlayer title = new MediaPlayer(new Media(this.getClass().getResource("title.mp3").toExternalForm()));
+    final private MediaPlayer gaming = new MediaPlayer(new Media(this.getClass().getResource("yoshi.mp3").toExternalForm()));
+    final private AudioClip playerDown = new AudioClip(this.getClass().getResource("gameset.mp3").toExternalForm());
+    boolean bgmHelper = false;
 
     public static void main(String[] args) {
         launch();
@@ -92,11 +93,10 @@ public class Anime extends Application {
         timeline.setCycleCount(Timeline.INDEFINITE);
 
         // Roll the track
-        audio.setCycleCount(MediaPlayer.INDEFINITE);
-        setBGM();
-        audio.play(); //TODO 是否移动下去
+        title.setCycleCount(MediaPlayer.INDEFINITE);
+        gaming.setCycleCount(MediaPlayer.INDEFINITE);
+        playBGM();
 
-//        System.out.println(timeline.getStatus().toString());
         return toReturn;
     }
 
@@ -126,12 +126,12 @@ public class Anime extends Application {
         speedCtrl.setPrefWidth(80);
         speedCtrl.setMin(0); speedCtrl.setMax(2);
         speedCtrl.setValue(1);
-        speedCtrl.setTooltip(new Tooltip("" + speedCtrl.getValue()));
+        speedCtrl.setTooltip(new Tooltip("Game Speed"));
         speedCtrl.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 timeline.setRate(speedCtrl.getValue());
-                audio.setRate(speedCtrl.getValue());
+                gaming.setRate(speedCtrl.getValue());
             }
         });
         speedTab.getChildren().addAll(speedLbl, speedCtrl);
@@ -170,16 +170,18 @@ public class Anime extends Application {
                         @Override
                         public void handle(ActionEvent e) {
                             if (!gameMap.run()) {
-                                timeline.stop(); // 如果返回游戏结束 停止当前timeline回STOPPED状态
-                                setBGM(); // 更改游戏为gameover音乐 然后接主题曲 TODO
+                                bgmHelper = true;
+                                playBGM(); // 更改游戏为gameover音乐 然后接主题曲 TODO
                             }
                         }
                     });
+                    if (!timeline.getKeyFrames().isEmpty()) timeline.getKeyFrames().remove(0); // Help to stable the reset
                     timeline.getKeyFrames().add(frame);
-                    timeline.setRate(1);
-                    speedCtrl.setValue(1);
-                    setBGM(); // 更改音乐为游戏进行曲 TODO
-                    gameStart = true;
+                    timeline.setRate(1.0D);
+                    gaming.setRate(1.0D);
+                    speedCtrl.setValue(1.0D);
+                    playBGM(); // 更改音乐为游戏进行曲 TODO
+                    gameStart = true; // 用来帮助BGM确认状态
                 }
                 timeline.play(); // 此处只有状态为 RUNNING 或 PAUSE才能触发
             }
@@ -196,11 +198,18 @@ public class Anime extends Application {
             @Override
             public void handle(ActionEvent actionEvent) {
                 // 无论何种状态直接重置回初始画面
-                timeline.stop();
-                setBGM(); // 更改音乐回主题歌 TODO
-//                timeline.getKeyFrames().removeAll();
-                gameMap = new CreatureControl();
-                root.setCenter(gameMap);
+                if (gameStart) {
+                    timeline.stop();
+//                    timeline.getKeyFrames().removeAll();
+                    timeline.setRate(1.0D);
+                    gaming.setRate(1.0D);
+                    speedCtrl.setValue(1.0D);
+                    playBGM(); // 更改音乐回主题歌 TODO
+                    gameStart = false;
+                    bgmHelper = false;
+                    gameMap = new CreatureControl();
+                    root.setCenter(gameMap);
+                }
             }
         });
 
@@ -280,17 +289,25 @@ public class Anime extends Application {
     }
 
     /**
-     * Background Music Player setting
+     * Background Music Player setting\
+     * all audio stop() in this method.
+     * 1. Fresh start: new thread with no music && gameStart = false, play title
+     * 2. Game playing: playing title && gameStart = false, stop title & play gaming
+     * 3. GAMEOVER: playing gaming && gameStart = true, stop gaming, play gameover, play title
+     * 4. RESET: playing gaming && gameStart = true, stop gaming, play title
      */
-    // audio.stop()都在此处做
-    // 几种STOP状态
-    // 1. GAMEOVER导致的STOP 需要先播放gameover音乐 然后接主题曲
-    // 2. reset导致的STOP 需要直接接主题曲
-    // 3. 最早先开始的STOP
-    private void setBGM() {
+    private void playBGM() {
         if (!gameStart) {
-            audio.play();
-        } else audio.stop();
+            if (title.getStatus().equals(MediaPlayer.Status.PLAYING)) {
+                title.stop(); gaming.play();
+            }
+            else title.play();
+        }
+        else if (gaming.getStatus().equals(MediaPlayer.Status.PLAYING)) {
+            gaming.stop();
+            if (gameStart && bgmHelper) playerDown.play();
+            title.play();
+        }
     }
 
 }
