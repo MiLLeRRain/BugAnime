@@ -11,6 +11,7 @@ public abstract class Creature extends ImageView {
     protected double matureEnergy;
     protected double rotateV = 0;
     protected double birthRate;
+    protected int babys;
 
     protected double x;
     protected double y;
@@ -28,13 +29,15 @@ public abstract class Creature extends ImageView {
         this.img = new Image(name+".png");
         this.setImage(img);
         this.setPreserveRatio(true);
-        this.setX(x);
-        this.setY(y);
+        this.setTranslateX(x);
+        this.setTranslateY(y);
     }
 
-    public void move(double theta, boolean debug) {};
+    public void move(double theta) {}
 
-    public void rotate(double theta, boolean debug) {};
+    public void move(double theta, boolean debug) {}
+
+    public void rotate(double theta, boolean debug) {}
 
     /**
      * For testing

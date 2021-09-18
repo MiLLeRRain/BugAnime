@@ -79,13 +79,9 @@ public class Main extends Application {
         hbox.setSpacing(10);
         hbox.setStyle("-fx-background-color: #336699;");
 
-
-
         Button buttonCurrent = new Button("Start Moving");
         buttonCurrent.setPrefSize(100, 20);
         buttonCurrent.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> moveBugs());
-
-
 
         Button btnShow = new Button("Show Bugs");
         btnShow.setPrefSize(100, 20);
