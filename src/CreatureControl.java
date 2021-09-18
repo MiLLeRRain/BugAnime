@@ -8,6 +8,8 @@ import javafx.scene.Group;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -47,8 +49,11 @@ public class CreatureControl extends Pane {
     // Random helper
     private final Random random = new Random();
 
-    //
+    // Game status flag
     private boolean gameSet = true;
+
+    // Background Music
+    private MediaPlayer audio;
 
     /**
      * Build an empty scene
@@ -525,6 +530,18 @@ public class CreatureControl extends Pane {
      */
     private double dist(Creature o, Creature t) {
         return Math.sqrt(Math.pow((o.x - t.x), 2) + Math.pow((o.y - t.y), 2));
+    }
+
+    /**
+     * Background Music Player setting
+     */
+    private void setBGM() {
+        if (!gameStart) {
+            Media buzzer = new Media(this.getClass().getResource("yoshi.mp3").toExternalForm());
+            audio = new MediaPlayer(buzzer);
+            audio.setCycleCount(MediaPlayer.INDEFINITE);
+            audio.play();
+        } else audio.stop();
     }
 
 }

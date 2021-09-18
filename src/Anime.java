@@ -38,7 +38,6 @@ public class Anime extends Application {
     private CreatureControl gameMap = new CreatureControl(); // Game map, and Action controller for all Creature.
     private KeyFrame frame; // Animation KeyFrame for Main Pane
     private Timeline timeline = new Timeline(); // Animation Timeline for Main Pane
-    private MediaPlayer audio; // Background Music
 
     private boolean gameStart = false; // Game status flag for reset feature
 
@@ -73,6 +72,7 @@ public class Anime extends Application {
 
         Scene scene = new Scene(root);
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.setWidth(STAGE_WIDTH); stage.setHeight(STAGE_HEIGHT);
         stage.centerOnScreen();
         stage.setTitle("Yoshi Anime");
@@ -265,15 +265,5 @@ public class Anime extends Application {
         }
     }
 
-    /**
-     * Background Music Player setting
-     */
-    private void setBGM() {
-        if (!gameStart) {
-            Media buzzer = new Media(this.getClass().getResource("yoshi.mp3").toExternalForm());
-            audio = new MediaPlayer(buzzer);
-            audio.setCycleCount(MediaPlayer.INDEFINITE);
-            audio.play();
-        } else audio.stop();
-    }
+
 }
