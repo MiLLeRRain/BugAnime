@@ -19,6 +19,8 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.util.Objects;
+
 /**
  * Assignment for SWEN502 (ICT). Week 37, 2021.
  * @Author Liam Han (Apang)
@@ -41,16 +43,16 @@ public class Anime extends Application {
     private KeyFrame frame; // Animation KeyFrame for Main Pane
     private final Timeline timeline = new Timeline(); // Animation Timeline for Main Pane
 
-    private boolean gameStart = false; // 用来帮助BGM确认状态
+    private boolean gameStart = false; // Help BGM to play correctly
 
     // Default starting parameter
     private int plantQuantity = 10;
     private int trexQuantity = 10;
 
     // Background Music
-    final private MediaPlayer title = new MediaPlayer(new Media(this.getClass().getResource("title.mp3").toExternalForm()));
-    final private MediaPlayer gaming = new MediaPlayer(new Media(this.getClass().getResource("yoshi.mp3").toExternalForm()));
-    final private AudioClip playerDown = new AudioClip(this.getClass().getResource("gameset.mp3").toExternalForm());
+    final private MediaPlayer title = new MediaPlayer(new Media(Objects.requireNonNull(this.getClass().getResource("title.mp3")).toExternalForm()));
+    final private MediaPlayer gaming = new MediaPlayer(new Media(Objects.requireNonNull(this.getClass().getResource("yoshi.mp3")).toExternalForm()));
+    final private AudioClip playerDown = new AudioClip(Objects.requireNonNull(this.getClass().getResource("gameset.mp3")).toExternalForm());
     boolean bgmHelper = false;
 
     public static void main(String[] args) {
@@ -161,8 +163,6 @@ public class Anime extends Application {
         play.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                // 如果timeline在STOPPED， 则重开 相当于RESET， 如果在PAUSED，则进行下一步play
-                // 或者用户输入数据改变，则可直接重置
                 if (timeline.getStatus().toString().equals("STOPPED")) {
                     gameMap = new CreatureControl(plantQuantity, trexQuantity);
                     root.setCenter(gameMap);
@@ -171,7 +171,7 @@ public class Anime extends Application {
                         public void handle(ActionEvent e) {
                             if (!gameMap.run()) {
                                 bgmHelper = true;
-                                playBGM(); // 更改游戏为gameover音乐 然后接主题曲 TODO
+                                playBGM();
                             }
                         }
                     });
@@ -180,10 +180,10 @@ public class Anime extends Application {
                     timeline.setRate(1.0D);
                     gaming.setRate(1.0D);
                     speedCtrl.setValue(1.0D);
-                    playBGM(); // 更改音乐为游戏进行曲 TODO
-                    gameStart = true; // 用来帮助BGM确认状态
+                    playBGM();
+                    gameStart = true;
                 }
-                timeline.play(); // 此处只有状态为 RUNNING 或 PAUSE才能触发
+                timeline.play();
             }
         });
 
@@ -197,14 +197,13 @@ public class Anime extends Application {
         reset.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                // 无论何种状态直接重置回初始画面
+                // Reset to title frame in what ever status
                 if (gameStart) {
                     timeline.stop();
-//                    timeline.getKeyFrames().removeAll();
                     timeline.setRate(1.0D);
                     gaming.setRate(1.0D);
                     speedCtrl.setValue(1.0D);
-                    playBGM(); // 更改音乐回主题歌 TODO
+                    playBGM();
                     gameStart = false;
                     bgmHelper = false;
                     gameMap = new CreatureControl();
