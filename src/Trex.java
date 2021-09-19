@@ -38,15 +38,7 @@ public class Trex extends Creature {
      */
     @Override
     public void move(double theta, boolean debug) {
-
-
-//        System.out.println(theta); //TODO Testing point
         rotate(theta, debug);
-
-//        if (x > 610 || y > 510) throw new RuntimeException("Aahhhhhh!");
-
-//        System.out.println(this.getParent().getLayoutBounds().getWidth());
-//        System.out.println(this.getParent().getLayoutBounds().getHeight());
         bounce();
 
         this.setTranslateX(x += speed * Math.cos(thetaMoveTo));
@@ -57,8 +49,8 @@ public class Trex extends Creature {
         else this.setTranslateY(y += speed * Math.sin(thetaMoveTo));
         boolean flip = speed * Math.cos(thetaMoveTo) < 0;
         updateImg(flip);
-        updateEnergy(-0.06);//TODO testing
 
+        updateEnergy(-0.06);
     }
 
     /**

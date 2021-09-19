@@ -290,7 +290,7 @@ public class CreatureControl extends Pane {
             if (random.nextDouble() < 0.01 && avoidGlitch(p))
                 theta = random.nextDouble() * 2 * Math.PI; //TODO Testing here
             else theta = p.thetaMoveTo;
-//            System.out.println("I'm Plant" + plants.indexOf(p) + "Energy" + p.energy);
+
             //Rule 1 Death
             if (p.energy <= 0) {
                 plantsToRemove.add(p);
@@ -371,14 +371,10 @@ public class CreatureControl extends Pane {
         // update when detect plant.
         // Theta is the angle for random move or to define later by detected plant.
         double theta;
-//        System.out.println(trexes.size());
         for (Trex t : trexes) {
 
             // Remove this t, to avoid double contact by other trex in loop.
             if (otherTrexes.size() >= 1) otherTrexes.remove(t);
-
-            //TODO Testing
-//            System.out.println("I'm Trex"+trexes.indexOf(t) + " Energy" + t.energy);
 
             // Randomise a moving direction at Rate of 0.5%.
             if (random.nextDouble() < 0.005 && avoidGlitch(t))
@@ -421,10 +417,8 @@ public class CreatureControl extends Pane {
 
             //Rule 2 Enjoy a mushroom or a cactus
             else if (contactPlant != null) {
-//                System.out.println("Before Eating" + plants.size());
                 t.eat(contactPlant);
                 contactPlant.die();
-//                System.out.println("After Eating" + plants.size());
                 bestFeast = Math.max(t.feastScore, bestFeast);
             }
 
@@ -432,7 +426,6 @@ public class CreatureControl extends Pane {
             else if (isReadyToBreed(t, contactTrex)) {
                 t.respawn();
                 contactTrex.respawn();
-//                System.out.println("I'm contacted Trex E="+contactTrex.energy);
                 Trex baby = new Trex(t.x + (random.nextInt(60) - 30), t.y + (random.nextInt(60) - 30));
                 trexesToAdd.add(baby);
                 this.getChildren().add(baby);
@@ -442,11 +435,7 @@ public class CreatureControl extends Pane {
 
             //Rule 4 Tracing yumyum
             else if (detectedPlant != null && t.energy > 3) { // t.energy > 3, to prevent Trex chansing same target to death.
-//                System.out.println("Detected" + plants.indexOf(detectedPlant)
-//                +"@" + detectedPlant.x + "/" + detectedPlant.y);
                 theta = Math.acos((detectedPlant.x - t.x) / distToPlant);
-//                System.out.println(t.speed * Math.cos(theta));
-//                System.out.println(t.speed * Math.sin(theta));
                 boolean debug = t.y > detectedPlant.y;
                 t.move(theta, debug);
             }
