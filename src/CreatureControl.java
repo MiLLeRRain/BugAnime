@@ -241,7 +241,7 @@ public class CreatureControl extends Pane {
 
     /**
      * Animate the Text color for opening and ending
-     * @param banner
+     * @param banner is the Text for update
      */
     private void playForFun(Text banner) {
         Timeline fun = new Timeline();
@@ -259,14 +259,13 @@ public class CreatureControl extends Pane {
     /**
      * Random a HEX color string
      * from https://mlog.club/article/1029576
-     * @return
+     * @return the HEX color string
      */
-    public String randomHEXColor() {
+    private String randomHEXColor() {
         // create a big random number - maximum is ffffff (hex) = 16777215 (dez)
         int nextInt = random.nextInt(0xffffff + 1);
         // format it as hexadecimal string (with hashtag and leading zeros)
-        String colorCode = String.format("#%06x", nextInt);
-        return colorCode;
+        return String.format("#%06x", nextInt);
     }
 
     /**
@@ -484,7 +483,7 @@ public class CreatureControl extends Pane {
      * @param otherTrexes is the List contains non contacted Trexes excluding Trex t.
      * @param t           is the Trex that is looking for a mate.
      * @param contactTrex is the contacted Trex.
-     * @return
+     * @return the Contacted Trex
      */
     private Trex getContactTrex(ArrayList<Trex> otherTrexes, Trex t, Trex contactTrex) {
         if (!otherTrexes.isEmpty()) {

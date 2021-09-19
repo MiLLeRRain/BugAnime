@@ -21,6 +21,13 @@ public abstract class Creature extends ImageView {
 
     public Creature() {}
 
+    /**
+     * Constructor for creature
+     * @param x position
+     * @param y position
+     * @param name creature name
+     * @param size creature image width
+     */
     public Creature(double x, double y, String name, int size) {
         this.x = x;
         this.y = y;
@@ -40,6 +47,9 @@ public abstract class Creature extends ImageView {
 
     public void rotate(double theta, boolean debug) {}
 
+    /**
+     * Bouncing back from walls
+     */
     public void bounce() {
         if (this.getTranslateX() < 0 ||
                 this.getTranslateX() > this.getParent().getLayoutBounds().getWidth()) {
@@ -72,8 +82,15 @@ public abstract class Creature extends ImageView {
 
     public abstract void respawn();
 
+    /**
+     * Take over the target's energy
+     * @param target is a creature been eaten
+     */
     public void eat(Creature target) {}
 
+    /**
+     * Energy up
+     */
     public void grow() {}
 
     /**

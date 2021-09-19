@@ -25,7 +25,7 @@ public class Plant extends Creature {
      */
     @Override
     public void move(double theta) {
-        rotate(theta, true);
+        this.thetaMoveTo = theta;
         bounce();
         this.setTranslateX(x += speed * Math.cos(thetaMoveTo));
         this.setTranslateY(y += speed * Math.sin(thetaMoveTo));
@@ -38,11 +38,6 @@ public class Plant extends Creature {
     public void respawn() {
         updateEnergy(-10);
         this.babies++;
-    }
-
-    @Override
-    public void rotate(double theta, boolean debug) {
-        this.thetaMoveTo = theta;
     }
 
     /**
