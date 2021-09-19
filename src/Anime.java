@@ -20,13 +20,14 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
- * Assignment for SWEN502 (ICT School). Week 37, 2021.
+ * Assignment for SWEN502 (ICT). Week 37, 2021.
  * @Author Liam Han (Apang)
  *
  * Background gif image is made by Ben Matthews
  * https://canvasanimations.wordpress.com/2017/10/06/recreating-yoshis-island/
- * All copyrights of the characters used belongs to SUPER MARIO characters © NINTENDO.
  *
+ * All materials are used for personal only under Terms of Use, https://www.nintendo.com/terms-of-use/
+ * © NINTENDO.
  */
 public class Anime extends Application {
 
@@ -131,7 +132,7 @@ public class Anime extends Application {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 timeline.setRate(speedCtrl.getValue());
-                gaming.setRate(speedCtrl.getValue());
+                gaming.setRate(Math.max(speedCtrl.getValue(), 0.01D));
             }
         });
         speedTab.getChildren().addAll(speedLbl, speedCtrl);
@@ -150,7 +151,6 @@ public class Anime extends Application {
         Button reset = new Button("Reset");
         bb.getButtons().addAll(play, pause, reset);
 
-        bb.setStyle("-fx-background-color: DAE6F3;");
         bb.getButtons().forEach(b -> {
             ((Button) b).setPrefWidth(80);
             ((Button) b).setBackground(new Background(bgf));

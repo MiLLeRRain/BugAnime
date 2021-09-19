@@ -17,6 +17,7 @@ public abstract class Creature extends ImageView {
 
     protected double x; // Position
     protected double y; // Position
+    protected double thetaMoveTo; // Moving direction
 
     public Creature() {}
 
@@ -38,6 +39,17 @@ public abstract class Creature extends ImageView {
     public void move(double theta, boolean debug) {}
 
     public void rotate(double theta, boolean debug) {}
+
+    public void bounce() {
+        if (this.getTranslateX() < 0 ||
+                this.getTranslateX() > this.getParent().getLayoutBounds().getWidth()) {
+            this.thetaMoveTo += Math.PI;
+        }
+        if (this.getTranslateY() < 0 ||
+                this.getTranslateY() > this.getParent().getLayoutBounds().getHeight()) {
+            this.thetaMoveTo -= Math.PI;
+        }
+    }
 
     /**
      * Updating energy

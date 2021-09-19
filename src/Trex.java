@@ -47,14 +47,7 @@ public class Trex extends Creature {
 
 //        System.out.println(this.getParent().getLayoutBounds().getWidth());
 //        System.out.println(this.getParent().getLayoutBounds().getHeight());
-        if (this.getTranslateX() < 0 ||
-                this.getTranslateX() > this.getParent().getLayoutBounds().getWidth()) {
-            this.thetaMoveTo += Math.PI;
-        }
-        if (this.getTranslateY() < 0 ||
-                this.getTranslateY() > this.getParent().getLayoutBounds().getHeight()) {
-            this.thetaMoveTo -= Math.PI;
-        }
+        bounce();
 
         this.setTranslateX(x += speed * Math.cos(thetaMoveTo));
         // Because of the theta not always give the right positive / negative direction.
