@@ -8,33 +8,50 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Slider;
-import javafx.scene.image.Image;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.media.AudioClip;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Paint;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import javafx.util.Duration;
 
-import java.util.ArrayList;
-
+/**
+ * Assignment for SWEN502 (ICT). Week 37, 2021.
+ * @Author Liam Han (Apang)
+ *
+ * Background gif image is made by Ben Matthews
+ * https://canvasanimations.wordpress.com/2017/10/06/recreating-yoshis-island/
+ *
+ * All materials are used for personal only under Terms of Use, https://www.nintendo.com/terms-of-use/
+ * © NINTENDO.
+ */
 public class Anime extends Application {
 
-    final int STAGE_WIDTH = 600, STAGE_HEIGHT = 600;
+    // Universal stylish attributes for this application.
+    private final int STAGE_WIDTH = 600, STAGE_HEIGHT = 630;
+    private final BackgroundFill bgf =  new BackgroundFill(Paint.valueOf("#DAE6F3"), new CornerRadii(5), new Insets(2));
+    private final BorderStroke bos = new BorderStroke(Paint.valueOf("#009900"), BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(2));
 
-    CreatureControl gameMap;
+    private BorderPane root; // Main Pane for the Stage
+    private CreatureControl gameMap; // Game map, and Action controller for all Creature.
+    private KeyFrame frame; // Animation KeyFrame for Main Pane
+    private final Timeline timeline = new Timeline(); // Animation Timeline for Main Pane
 
-    private int plantQuantity = 10; //TODO user input later
-    private int trexQuantity = 10; //TODO user input later
+    private boolean gameStart = false; // 用来帮助BGM确认状态
 
+    // Default starting parameter
+    private int plantQuantity = 10;
+    private int trexQuantity = 10;
 
-    Timeline timeline = new Timeline();
+    // Background Music
+    final private MediaPlayer title = new MediaPlayer(new Media(this.getClass().getResource("title.mp3").toExternalForm()));
+    final private MediaPlayer gaming = new MediaPlayer(new Media(this.getClass().getResource("yoshi.mp3").toExternalForm()));
+    final private AudioClip playerDown = new AudioClip(this.getClass().getResource("gameset.mp3").toExternalForm());
+    boolean bgmHelper = false;
 
     public static void main(String[] args) {
         launch();
@@ -43,48 +60,11 @@ public class Anime extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-        BorderPane root = new BorderPane();
-        root.setPrefSize(STAGE_WIDTH, STAGE_HEIGHT);
-
-        timeline.setCycleCount(Timeline.INDEFINITE);
-
-        HBox menu = addHBox();
-
-        root.setTop(menu);
-
-//        Image dino = new Image("dino.jpeg");
-//        ImageView iv = new ImageView();
-//        iv.setImage(dino);
-//        iv.setFitWidth(50);
-//        iv.setPreserveRatio(true);
-//
-//        root.setCenter(iv);
-
-//        final CirclePane circle = new CirclePane();
-//        root.setCenter(circle);
-
-
-
-        gameMap = new CreatureControl(plantQuantity, trexQuantity); //TODO Interact with user
-
-        root.setCenter(gameMap);
-        root.getCenter().prefWidth(stage.getWidth());root.getCenter().prefHeight(stage.getHeight()-40);
-
-        KeyFrame frame = new KeyFrame(Duration.millis(10), new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent e) {
-
-                gameMap.run(); //TODO Fully controlled by CreatureControl
-
-            }
-        });
-
-        timeline.getKeyFrames().addAll(frame);
-        timeline.setAutoReverse(true);
-        timeline.play();
+        root = initializeBorderPane();
 
         Scene scene = new Scene(root);
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.setWidth(STAGE_WIDTH); stage.setHeight(STAGE_HEIGHT);
         stage.centerOnScreen();
         stage.setTitle("Yoshi Anime");
@@ -92,79 +72,242 @@ public class Anime extends Application {
     }
 
     /**
+     * Initialize the root BorderPane including timeline and audio to Title status
+     * @return root
+     */
+    private BorderPane initializeBorderPane() {
+        BorderPane toReturn = new BorderPane();
+
+        // Set menu pane
+        HBox menu = addTopBox();
+        toReturn.setTop(menu);
+
+        // Set center pane
+        gameMap = new CreatureControl();
+        toReturn.setCenter(gameMap);
+
+        // Set bottom pane
+        HBox bottom = addBottomBox();
+        toReturn.setBottom(bottom);
+
+        // Roll the animation
+        timeline.setCycleCount(Timeline.INDEFINITE);
+
+        // Roll the track
+        title.setCycleCount(MediaPlayer.INDEFINITE);
+        gaming.setCycleCount(MediaPlayer.INDEFINITE);
+        playBGM();
+
+        return toReturn;
+    }
+
+    /**
      * Create a HBox to contain all control buttons.
      * @return a HBox to the TOP.
      */
-    private HBox addHBox() {
-        HBox hb = new HBox();
-        //Text aniStatus = new Text("Anime ");
-        hb.setStyle("-fx-background-color: DAE6F3;");
-        hb.setAlignment(Pos.CENTER);
-        hb.setPadding(new Insets(15, 12, 15, 12));
-        hb.setSpacing(10);
+    private HBox addTopBox() {
 
-        BackgroundFill bgf =  new BackgroundFill(Paint.valueOf("#DAE6F3"), new CornerRadii(5), new Insets(2));
-        BorderStroke bos = new BorderStroke(Paint.valueOf("#009900"), BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(2));
+        // Create a menuTab that is holding all menu nodes to return
+        HBox menuTab = new HBox();
+        menuTab.setStyle("-fx-background-color: DAE6F3;");
+        menuTab.setAlignment(Pos.CENTER);
+        menuTab.setPadding(new Insets(15, 12, 15, 12));
+        menuTab.setSpacing(10);
 
-        Button play = new Button("Play");
-        play.setPrefWidth(80);
-        play.setBackground(new Background(bgf));
-        play.setBorder(new Border(bos));
-        play.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                timeline.play();
-            }
-        });
+        // Game status label and Speed controller
+        HBox speedTab = new HBox();
+        speedTab.setPrefWidth(200);
+        speedTab.setSpacing(10);
+        speedTab.setAlignment(Pos.CENTER_LEFT);
+        Label speedLbl= new Label("Speed:");
+        speedLbl.setPrefWidth(80);
+        speedLbl.setAlignment(Pos.CENTER);
 
-        Button pause = new Button("Pause");
-        pause.setPrefWidth(80);
-        pause.setBackground(new Background(bgf));
-        pause.setBorder(new Border(bos));
-        pause.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                timeline.pause();
-            }
-        });
-
-        Button stop = new Button("Stop");
-        stop.setPrefWidth(80);
-        stop.setBackground(new Background(bgf));
-        stop.setBorder(new Border(bos));
-        stop.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                timeline.stop();
-            }
-        });
-
-
-        Group btns = new Group();
-        btns.getChildren().add(play);
-
-
-        Text speed = new Text("Game Speed: ");
-
-        Slider playbackSpeed = new Slider();
-        playbackSpeed.setMin(0); playbackSpeed.setMax(5);
-        playbackSpeed.setValue(0.5);
-        playbackSpeed.setOnMouseDragged(new EventHandler<MouseEvent>() {
+        Slider speedCtrl = new Slider();
+        speedCtrl.setPrefWidth(80);
+        speedCtrl.setMin(0); speedCtrl.setMax(2);
+        speedCtrl.setValue(1);
+        speedCtrl.setTooltip(new Tooltip("Game Speed"));
+        speedCtrl.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                timeline.setRate(playbackSpeed.getValue());
+                timeline.setRate(speedCtrl.getValue());
+                gaming.setRate(Math.max(speedCtrl.getValue(), 0.01D));
             }
         });
-
+        speedTab.getChildren().addAll(speedLbl, speedCtrl);
         //TODO get status?
         timeline.statusProperty().addListener(new ChangeListener<Animation.Status>() {
             @Override
             public void changed(ObservableValue<? extends Animation.Status> observableValue, Animation.Status status, Animation.Status t1) {
-                System.out.println(t1.toString());
+                speedLbl.setText(t1.toString());
             }
         });
-        hb.getChildren().addAll(play, pause, stop, speed, playbackSpeed);
 
-        return hb;
+        // Assemble buttons into menuTab
+        ButtonBar bb = new ButtonBar();
+        Button play = new Button("Play");
+        Button pause = new Button("Pause");
+        Button reset = new Button("Reset");
+        bb.getButtons().addAll(play, pause, reset);
+
+        bb.getButtons().forEach(b -> {
+            ((Button) b).setPrefWidth(80);
+            ((Button) b).setBackground(new Background(bgf));
+            ((Button) b).setBorder(new Border(bos));
+        });
+
+        // Set ActionEvent for 3 buttons
+        play.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                // 如果timeline在STOPPED， 则重开 相当于RESET， 如果在PAUSED，则进行下一步play
+                // 或者用户输入数据改变，则可直接重置
+                if (timeline.getStatus().toString().equals("STOPPED")) {
+                    gameMap = new CreatureControl(plantQuantity, trexQuantity);
+                    root.setCenter(gameMap);
+                    frame = new KeyFrame(Duration.millis(10), new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent e) {
+                            if (!gameMap.run()) {
+                                bgmHelper = true;
+                                playBGM(); // 更改游戏为gameover音乐 然后接主题曲 TODO
+                            }
+                        }
+                    });
+                    if (!timeline.getKeyFrames().isEmpty()) timeline.getKeyFrames().remove(0); // Help to stable the reset
+                    timeline.getKeyFrames().add(frame);
+                    timeline.setRate(1.0D);
+                    gaming.setRate(1.0D);
+                    speedCtrl.setValue(1.0D);
+                    playBGM(); // 更改音乐为游戏进行曲 TODO
+                    gameStart = true; // 用来帮助BGM确认状态
+                }
+                timeline.play(); // 此处只有状态为 RUNNING 或 PAUSE才能触发
+            }
+        });
+
+        pause.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                if (gameStart) timeline.pause();
+            }
+        });
+
+        reset.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                // 无论何种状态直接重置回初始画面
+                if (gameStart) {
+                    timeline.stop();
+//                    timeline.getKeyFrames().removeAll();
+                    timeline.setRate(1.0D);
+                    gaming.setRate(1.0D);
+                    speedCtrl.setValue(1.0D);
+                    playBGM(); // 更改音乐回主题歌 TODO
+                    gameStart = false;
+                    bgmHelper = false;
+                    gameMap = new CreatureControl();
+                    root.setCenter(gameMap);
+                }
+            }
+        });
+
+        // Assemble all nodes into menuTab.
+        menuTab.getChildren().addAll(bb, speedTab);
+        menuTab.setBorder(new Border(bos));
+        return menuTab;
     }
+
+    /**
+     * Set a bottom box for text input area
+     * @return a HBox holding 2 text fields
+     */
+    private HBox addBottomBox() {
+        HBox bottom = new HBox();
+        bottom.setAlignment(Pos.CENTER_LEFT);
+        bottom.setStyle("-fx-background-color: DAE6F3;");
+
+        HBox pB = new HBox();
+        pB.setPrefWidth(300);
+        TextField pT = getTextField("Plant", "Enter an Integer number for Plant <=30", "Enter a custom number for Plant quantity.");
+        pB.getChildren().add(pT);
+
+        HBox tB = new HBox();
+        TextField tT = getTextField("Yoshi", "Enter an Integer number for Yoshi <=30", "Enter a custom number for Yoshi quantity.");
+        tB.getChildren().add(tT);
+
+        bottom.getChildren().addAll(pB, tB);
+        return bottom;
+    }
+
+    /**
+     * TestField build helper
+     * @param creature is the creature name
+     * @param s is the PromptText
+     * @param s2 is the TipText
+     * @return is finished TextField
+     */
+    private TextField getTextField(String creature, String s, String s2) {
+        TextField tf = new TextField();
+        tf.setPrefWidth(300);
+        tf.setStyle("-fx-background-color: DAE6F3;");
+        tf.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
+                if (!newValue.equals("") && !checkInteger(newValue)) tf.setText(oldValue);
+                else if (!newValue.equals("")) updateGameCondition(creature, Integer.parseInt(newValue));
+            }
+        });
+        tf.setBorder(new Border(bos));
+        tf.setPromptText(s);
+        tf.setTooltip(new Tooltip(s2));
+        return tf;
+    }
+
+    /**
+     * Update the starting parameter
+     * @param s tells which field argument to change
+     * @param v is the number of creature to spawn at the beginning
+     */
+    private void updateGameCondition(String s, int v) {
+        if (s.equals("Plant")) this.plantQuantity = v;
+        else this.trexQuantity = v;
+    }
+
+    /**
+     * Helper to validate input value
+     * @param str is the text input from user
+     * @return if the input is a legit Integer and number is lower than or equal to 30
+     */
+    private boolean checkInteger(String str) {
+        try {
+            return Integer.parseInt(str) <= 30; // Check if the entered value is an Integer and <= 30;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Background Music Player setting\
+     * all audio stop() in this method.
+     * 1. Fresh start: new thread with no music && gameStart = false, play title
+     * 2. Game playing: playing title && gameStart = false, stop title & play gaming
+     * 3. GAMEOVER: playing gaming && gameStart = true, stop gaming, play gameover, play title
+     * 4. RESET: playing gaming && gameStart = true, stop gaming, play title
+     */
+    private void playBGM() {
+        if (!gameStart) {
+            if (title.getStatus().equals(MediaPlayer.Status.PLAYING)) {
+                title.stop(); gaming.play();
+            }
+            else title.play();
+        }
+        else if (gaming.getStatus().equals(MediaPlayer.Status.PLAYING)) {
+            gaming.stop();
+            if (gameStart && bgmHelper) playerDown.play();
+            title.play();
+        }
+    }
+
 }

@@ -1,24 +1,32 @@
 import javafx.scene.image.Image;
-
 import java.util.Random;
 
+/**
+ * Trex (Yoshi) Class
+ */
 public class Trex extends Creature {
-    protected double speed = 1.5;
-    protected double detectorRange = 100;
-    protected double contactRange = 10;
-    protected double thetaMoveTo = - Math.PI / 2; // The angle trex is moving forward to.
+
+    protected double speed = 1.2; // Step speed
+    protected double detectorRange = 150; // Detecting range
+    protected double contactRange = 10; // Contact range, eat or mate
+    protected double thetaMoveTo = - Math.PI / 2; // The direction this Trex is facing and moving forward to
+    protected int feastScore; // The quantity of plants this Trex had eaten before it died.
+
+    // 2 images to animate, when moving right to left
     private Image trex = new Image("trex.png");
     private Image trex2 = new Image("trex2.png");
+    // 2 flipped images to animate, when moving right to left
+    private Image trexflip = new Image("trexflip.png");
+    private Image trex2flip = new Image("trex2flip.png");
 
-    Trex() {
-        super(300, 300, "trex", 30);
-        this.energyLimit = 20;
-        this.matureEnergy = 15;
-        this.birthRate = 0.4;
-    }
-
+    /**
+     * Constructor
+     * @param x position
+     * @param y position
+     */
     Trex(double x, double y) {
         super(x, y, "trex", 30);
+        this.energy = 10;
         this.energyLimit = 20;
         this.matureEnergy = 15;
         this.birthRate = 0.4;
@@ -30,44 +38,35 @@ public class Trex extends Creature {
      */
     @Override
     public void move(double theta, boolean debug) {
-//        System.out.println(theta); //TODO Testing point
         rotate(theta, debug);
+        bounce();
 
-//        if (x > 610 || y > 510) throw new RuntimeException("Aahhhhhh!");
-
-//        System.out.println(this.getParent().getLayoutBounds().getWidth());
-        if (this.getX() < 0 ||
-                this.getX() > this.getParent().getLayoutBounds().getWidth()) {
-            this.thetaMoveTo += Math.PI;
-        }
-        if (this.getY() < 0 ||
-                this.getY() > this.getParent().getLayoutBounds().getHeight()) {
-//            System.out.println("WHYyyy: Y:"+ this.getY());
-            this.thetaMoveTo -= Math.PI;
-        }
-
-//        System.out.println(x + "/" + y + " GET " + this.getX() + "/" + this.getY());
-
-
-        this.setX(x += speed * Math.cos(thetaMoveTo));
+        this.setTranslateX(x += speed * Math.cos(thetaMoveTo));
         // Because of the theta not always give the right positive / negative direction.
         // That's the reason we need to use a debug boolean here.
         // Same feature in rotate() method below.
-        if (debug) this.setY(y -= speed * Math.sin(thetaMoveTo));
-        else this.setY(y += speed * Math.sin(thetaMoveTo));
+        if (debug) this.setTranslateY(y -= speed * Math.sin(thetaMoveTo));
+        else this.setTranslateY(y += speed * Math.sin(thetaMoveTo));
+        boolean flip = speed * Math.cos(thetaMoveTo) < 0;
+        updateImg(flip);
 
-        updateImg();
-        updateEnergy(-0.05);//TODO testing
-
+        updateEnergy(-0.06);
     }
 
     /**
      * Animation of 2 status of trex.
      */
-    private void updateImg() {
-        if ((new Random().nextInt(10) % 3) != 0) {
-            this.setImage(trex);
-        } else this.setImage(trex2);
+    private void updateImg(boolean flip) {
+        if (flip) {
+            if ((new Random().nextInt(10) % 3) != 0) {
+                this.setImage(trexflip);
+            } else this.setImage(trex2flip);
+        }
+        else {
+            if ((new Random().nextInt(10) % 3) != 0) {
+                this.setImage(trex);
+            } else this.setImage(trex2);
+        }
     }
 
     /**
@@ -80,15 +79,23 @@ public class Trex extends Creature {
         else this.setRotate(theta / Math.PI * 180); //TODO check here
     }
 
+    /**
+     * Eat, update energy, update score field
+     * @param target the plant been eaten
+     */
     @Override
     public void eat(Creature target) {
         updateEnergy(target.energy);
+        feastScore++;
     }
 
+    /**
+     * Give birth: consume energy, update field to store the number of its offspring
+     */
     @Override
     public void respawn() {
-        updateEnergy(-this.energy / 2);
+        updateEnergy(-this.energy / 3);
+        this.babies++;
     }
-
 
 }
